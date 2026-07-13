@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}EcoTrack | Safety Alerts{% endblock %}
+{% block page_title %}Safety / Anomaly Alerts{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-3">
+    <form action="{{ url_for('simulate_anomaly') }}" method="post">
+        <button type="submit" class="btn btn-outline-warning">Simulate Anomaly (Exception)</button>
+    </form>
+</div>
+
+<div class="card industrial-card">
+    <div class="card-header border-danger-subtle">Anomaly Detected Warnings</div>
+    <div class="card-body p-0">
+        {% if alerts %}
+            <div class="table-responsive">
+                <table class="table table-dark table-striped mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Timestamp</th>
+                            <th scope="col">Severity</th>
+                            <th scope="col">Alert</th>
+                            <th scope="col">Exception Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert in alerts %}
+                            <tr>
+                                <td>{{ alert.time }}</td>
+                                <td class="text-uppercase">{{ alert.severity }}</td>
+                                <td>{{ alert.message }}</td>
+                                <td>{{ alert.detail if alert.detail else "-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-3 text-secondary">No alerts have been logged.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

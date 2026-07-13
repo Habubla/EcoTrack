@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}EcoTrack | Optimization Scheduler{% endblock %}
+{% block page_title %}Optimization Scheduler{% endblock %}
+
+{% block content %}
+<div class="card industrial-card mb-3">
+    <div class="card-header border-info-subtle">How This Scheduler Reduces Electricity Bills</div>
+    <div class="card-body">
+        <p class="mb-2">
+            The Optimization Scheduler maps your 24-hour tariff cycle and flags the lowest-cost windows for energy-intensive operations.
+            By shifting flexible loads such as HVAC pre-cooling, pumping, battery charging, and non-critical lab equipment to these slots,
+            you can reduce average energy purchase cost without affecting core electrical demand.
+        </p>
+        <p class="mb-0 text-secondary">
+            Operational guideline: prioritize tasks in rows marked <span class="text-success fw-semibold">Best Time to Save</span>,
+            use <span class="fw-semibold">Moderate Cost</span> windows as fallback, and avoid <span class="fw-semibold">High Cost Window</span>
+            periods for discretionary loads to improve monthly bill performance.
+        </p>
+        <p class="mb-0 mt-2 text-secondary">
+            Assumed average power consumption for non-essential appliances is <span class="fw-semibold">{{ assumed_avg_non_essential_kw }} kW</span> per appliance.
+        </p>
+    </div>
+</div>
+
+<div class="card industrial-card">
+    <div class="card-header border-info-subtle">24-Hour Electricity Price Cycle</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-striped table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Time Slot</th>
+                        <th scope="col">Tariff (INR/kWh)</th>
+                        <th scope="col">Assumed Non-essential Load (kW)</th>
+                        <th scope="col">Recommended Appliance Combination</th>
+                        <th scope="col">Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in price_rows %}
+                        <tr class="{% if row.recommendation == 'Best Time to Save' %}table-success highlighted-row{% endif %}">
+                            <td>{{ row.hour_label }}</td>
+                            <td>{{ row.price_per_kwh }}</td>
+                            <td>{{ row.assumed_non_essential_kw }}</td>
+                            <td>{{ row.recommended_combo }}</td>
+                            <td>
+                                {% if row.recommendation == 'Best Time to Save' %}
+                                    <span class="fw-semibold text-success">Best Time to Save</span>
+                                {% elif row.recommendation == 'Moderate Cost' %}
+                                    Moderate Cost
+                                {% else %}
+                                    High Cost Window
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

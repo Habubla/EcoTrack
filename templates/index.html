@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}EcoTrack | Dashboard{% endblock %}
+{% block page_title %}Energy Overview{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-3">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card industrial-card h-100">
+            <div class="card-body">
+                <p class="kpi-label">Generation</p>
+                <h3 class="kpi-value">{{ overview.generation_kw }} kW</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card industrial-card h-100">
+            <div class="card-body">
+                <p class="kpi-label">Consumption</p>
+                <h3 class="kpi-value">{{ overview.consumption_kw }} kW</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card industrial-card h-100">
+            <div class="card-body">
+                <p class="kpi-label">Power Factor</p>
+                <h3 class="kpi-value">{{ overview.power_factor }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card industrial-card h-100">
+            <div class="card-body">
+                <p class="kpi-label">Grid Frequency</p>
+                <h3 class="kpi-value">{{ overview.grid_frequency_hz }} Hz</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-6">
+        <div class="card industrial-card chart-card h-100">
+            <div class="card-header border-info-subtle">
+                Production vs. Consumption
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ url_for('static', filename='images/' + chart_line) }}?v={{ chart_v }}"
+                     class="img-fluid chart-img" alt="Production vs. Consumption chart">
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card industrial-card chart-card h-100">
+            <div class="card-header border-info-subtle">
+                Load Distribution by Building
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ url_for('static', filename='images/' + chart_pie) }}?v={{ chart_v }}"
+                     class="img-fluid chart-img" alt="Load distribution pie chart">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card industrial-card">
+    <div class="card-header border-warning-subtle">Safety / Alerts Snapshot</div>
+    <div class="card-body">
+        {% if alerts %}
+            <div class="list-group list-group-flush">
+                {% for alert in alerts %}
+                    <div class="list-group-item bg-transparent text-light border-secondary-subtle">
+                        <strong>{{ alert.message }}</strong>
+                        <div class="small text-secondary">{{ alert.time }}{% if alert.detail %} | {{ alert.detail }}{% endif %}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-secondary mb-0">No active anomaly warnings.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card industrial-card mt-3">
+    <div class="card-header border-info-subtle">Monitored Buildings</div>
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+            {% for building in buildings %}
+                <span class="badge building-badge">{{ building }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="card industrial-card mt-3">
+    <div class="card-header border-info-subtle">Building-wise Energy Consumption</div>
+    <div class="card-body">
+        <form method="get" action="{{ url_for('index') }}" class="row g-2 align-items-end mb-3">
+            <div class="col-md-6 col-lg-4">
+                <label for="building" class="form-label mb-1">Select Building</label>
+                <select id="building" name="building" class="form-select">
+                    {% for building in buildings %}
+                        <option value="{{ building }}" {% if building == selected_building %}selected{% endif %}>{{ building }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <button type="submit" class="btn btn-primary w-100">View</button>
+            </div>
+            <div class="col-md-12 col-lg-6">
+                <div class="selected-building-pill">
+                    <strong>{{ selected_building_data.building }}</strong>
+                    <span>{{ selected_building_data.consumption_kwh }} kWh/day</span>
+                    <span>{{ selected_building_data.percentage }}% share</span>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Building</th>
+                        <th scope="col">Consumption (kWh/day)</th>
+                        <th scope="col">Share</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in consumption_by_building %}
+                        <tr>
+                            <td>{{ row.building }}</td>
+                            <td>{{ row.consumption_kwh }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress consumption-progress">
+                                        <div class="progress-bar bg-info consumption-bar" role="progressbar" data-width="{{ row.percentage }}" aria-valuenow="{{ row.percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <span class="small">{{ row.percentage }}%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

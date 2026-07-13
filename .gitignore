@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+.venv/
+venv/
+
+.ecotrack.db
+ecotrack.db
+
+uploads/
+
+.DS_Store
+Thumbs.db
+
+# Hide security findings and summary
+SECURITY_FINDINGS.md
+SECURITY_SUMMARY.md
+
+# Hide implementation files
+
+

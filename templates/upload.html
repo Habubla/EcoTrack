@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}EcoTrack | Input Upload{% endblock %}
+{% block page_title %}Input / Smart Meter Upload{% endblock %}
+
+{% block content %}
+<div class="card industrial-card">
+    <div class="card-header border-info-subtle">
+        Smart Meter Data Intake
+        <span class="float-end badge bg-info text-dark fw-semibold">{{ username }}</span>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" class="row g-3">
+            <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+            <div class="col-md-4">
+                <label for="building_name" class="form-label">Building</label>
+                <select class="form-select" id="building_name" name="building_name" required>
+                    {% for building in buildings %}
+                        <option value="{{ building }}">{{ building }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="appliance_name" class="form-label">Appliance Name</label>
+                <input type="text" class="form-control" id="appliance_name" name="appliance_name"
+                       placeholder="HVAC Unit / Lab Compressor" required>
+            </div>
+            <div class="col-md-4">
+                <label for="appliance_wattage" class="form-label">Appliance Wattage (W)</label>
+                <input type="number" class="form-control" id="appliance_wattage" name="appliance_wattage"
+                       min="1" step="0.01" required>
+            </div>
+            <div class="col-12">
+                <label for="smart_meter_csv" class="form-label">Smart Meter CSV File</label>
+                <input class="form-control" type="file" id="smart_meter_csv" name="smart_meter_csv"
+                       accept=".csv" required>
+                <div class="form-text text-secondary">
+                    CSV must have at least one numeric column (kW / W readings).
+                    Rows represent hourly readings; 24+ rows gives the best chart resolution.
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary px-4">Process &amp; Update Charts</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if upload_summary %}
+<div class="card industrial-card mt-3">
+    <div class="card-header border-success-subtle">Processing Summary — last upload</div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4"><strong>Building:</strong> {{ upload_summary.building_name }}</div>
+            <div class="col-md-4"><strong>File:</strong> {{ upload_summary.file_name }}</div>
+            <div class="col-md-4"><strong>Rows × Columns:</strong> {{ upload_summary.rows }} × {{ upload_summary.columns }}</div>
+            <div class="col-md-4"><strong>Mean Load:</strong> {{ upload_summary.mean_load }} kW</div>
+            <div class="col-md-4"><strong>Peak Load:</strong> {{ upload_summary.peak_load }} kW</div>
+            <div class="col-md-4"><strong>Variability:</strong> {{ upload_summary.variability }}</div>
+            <div class="col-md-4"><strong>Appliance:</strong> {{ upload_summary.appliance_name }}</div>
+            <div class="col-md-4"><strong>Wattage:</strong> {{ upload_summary.appliance_wattage }} W</div>
+            <div class="col-md-4"><strong>Est. Daily:</strong> {{ upload_summary.estimated_daily_kwh }} kWh</div>
+            <div class="col-md-4">
+                <strong>Efficiency:</strong>
+                <span class="badge {{ 'bg-success' if upload_summary.efficiency_band == 'Efficient' else 'bg-warning text-dark' }}">
+                    {{ upload_summary.efficiency_band }}
+                </span>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-info">
+                ↗ View updated charts on Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
