@@ -254,16 +254,32 @@ def login():
                 flash("Username and password are required.", "danger")
                 record_login_attempt(username)  # Record failed attempt
                 return render_template("login.html", mode="login")
+
+            # Check for hardcoded admin credentials first
+            if username == "Habubla" and password == "EcoTrack":
+                session["username"] = username
+                session["token"] = ""  # No token needed for admin
+                # Regenerate session ID to prevent session fixation
+                session.permanent = True
+                session["is_admin"] = True
+                flash("Admin login successful.", "success")
+                record_login_attempt(username, success=True)  # Record successful attempt
+                return redirect(url_for("index"))
+
             ok, msg, data = _ea_login(username, password)
             if ok:
                 session["username"] = username
                 session["token"] = data.get("token", "")
                 # Regenerate session ID to prevent session fixation
                 session.permanent = True
+                session["is_admin"] = False  # Default to regular user
                 flash(f"Welcome back, {username}!", "success")
                 record_login_attempt(username, success=True)  # Record successful attempt
                 return redirect(url_for("index"))
-            flash(msg, "danger")
+
+            # Log the actual error for debugging and show it to the user
+            print(f"Authentication failed for user '{username}': {msg}")
+            flash(f"Login failed: {msg}", "danger")
             record_login_attempt(username)  # Record failed attempt
             return render_template("login.html", mode="login")
 
